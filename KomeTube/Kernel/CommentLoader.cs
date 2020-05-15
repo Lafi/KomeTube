@@ -14,6 +14,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 using KomeTube.Kernel.YtLiveChatDataModel;
+using System.Windows.Controls;
+using Newtonsoft.Json.Linq;
 
 namespace KomeTube.Kernel
 {
@@ -403,6 +405,7 @@ namespace KomeTube.Kernel
             ParseTextMessage(liveChatPaidMessageRenderer, paidMsgRd);
 
             //解析付費留言內容
+            // Console.WriteLine("{0}", paidMsgRd);
             liveChatPaidMessageRenderer.purchaseAmountText.simpleText = Convert.ToString(JsonHelper.TryGetValueByXPath(paidMsgRd, "purchaseAmountText.simpleText", ""));
             liveChatPaidMessageRenderer.headerBackgroundColor = Convert.ToInt64(JsonHelper.TryGetValueByXPath(paidMsgRd, "headerBackgroundColor", 0));
             liveChatPaidMessageRenderer.headerTextColor = Convert.ToInt64(JsonHelper.TryGetValueByXPath(paidMsgRd, "headerTextColor", 0));
@@ -419,13 +422,21 @@ namespace KomeTube.Kernel
         /// <param name="txtMsgRd">json data.</param>
         private void ParseTextMessage(LiveChatTextMessageRenderer liveChatTextMessageRenderer, dynamic txtMsgRd)
         {
+            // Console.WriteLine("{0}", txtMsgRd);
             liveChatTextMessageRenderer.authorExternalChannelId = Convert.ToString(JsonHelper.TryGetValueByXPath(txtMsgRd, "authorExternalChannelId", ""));
             liveChatTextMessageRenderer.authorName.simpleText = Convert.ToString(JsonHelper.TryGetValueByXPath(txtMsgRd, "authorName.simpleText", ""));
             liveChatTextMessageRenderer.authorPhoto.thumbnails = ParseAuthorPhotoThumb(JsonHelper.TryGetValueByXPath(txtMsgRd, "authorPhoto.thumbnails", null));
             liveChatTextMessageRenderer.contextMenuAccessibility.accessibilityData.label = Convert.ToString(JsonHelper.TryGetValueByXPath(txtMsgRd, "contextMenuAccessibility.accessibilityData.label", ""));
             liveChatTextMessageRenderer.id = Convert.ToString(JsonHelper.TryGetValueByXPath(txtMsgRd, "id", ""));
             liveChatTextMessageRenderer.timestampUsec = Convert.ToInt64(JsonHelper.TryGetValueByXPath(txtMsgRd, "timestampUsec", 0));
-            liveChatTextMessageRenderer.message.simpleText = Convert.ToString(JsonHelper.TryGetValueByXPath(txtMsgRd, "message.simpleText", ""));
+
+            // extract message from JSON array
+            JArray messageJArray = JsonHelper.TryGetValueByXPath(txtMsgRd, "message.runs", "");
+            string concatenatedMessage = "";
+            foreach (JObject item in messageJArray) {
+                concatenatedMessage += item.GetValue("text").ToString() + "\n";
+            }
+            liveChatTextMessageRenderer.message.simpleText = concatenatedMessage;
             //liveChatTextMessageRenderer.contextMenuEndpoint
         }
 
