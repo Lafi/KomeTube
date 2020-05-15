@@ -6,10 +6,14 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
 using System.Windows.Data;
+
 
 using KomeTube.Common;
 using KomeTube.View;
+
+
 namespace KomeTube.ViewModel
 {
     public class PuzzleCenterVM : ViewModelBase
@@ -236,7 +240,10 @@ namespace KomeTube.ViewModel
             for (int i = 0; i < _ansColle.Count; i++)
             {
                 PuzzleAnswerVM ans = _ansColle.ElementAt(i);
-                if (String.Equals(ans.Answer, vm.Message))
+                if (String.Equals(
+                        Regex.Replace(ans.Answer, @"\t|\n|\r", ""),
+                        Regex.Replace(vm.Message, @"\t|\n|\r", ""))
+                    )
                 {
                     //判斷同一位留言者是否已經猜中，避免重複記名
                     if (!ans.IsNameExist(vm))
